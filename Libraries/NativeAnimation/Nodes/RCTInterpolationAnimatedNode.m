@@ -14,6 +14,7 @@
   __weak RCTValueAnimatedNode *_parentNode;
   NSArray<NSNumber *> *_inputRange;
   NSArray<NSNumber *> *_outputRange;
+  BOOL _isOutputRangeAnimations;
   NSString *_extrapolateLeft;
   NSString *_extrapolateRight;
 }
@@ -29,6 +30,7 @@
         [outputRange addObject:value];
       }
     }
+    _isOutputRangeAnimations = ((NSNumber *)config[@"isOutputRangeAnimations"]).boolValue;
     _outputRange = [outputRange copy];
     _extrapolateLeft = config[@"extrapolateLeft"];
     _extrapolateRight = config[@"extrapolateRight"];
@@ -36,31 +38,40 @@
   return self;
 }
 
-- (void)onAttachedToNode:(RCTAnimatedNode *)parent
-{
-  [super onAttachedToNode:parent];
-  if ([parent isKindOfClass:[RCTValueAnimatedNode class]]) {
-    _parentNode = (RCTValueAnimatedNode *)parent;
-  }
-}
-
-- (void)onDetachedFromNode:(RCTAnimatedNode *)parent
-{
-  [super onDetachedFromNode:parent];
-  if (_parentNode == parent) {
-    _parentNode = nil;
-  }
-}
-
 - (void)performUpdate
 {
   [super performUpdate];
+  _parentNode = (RCTValueAnimatedNode *)[self.parentNodes objectForKey:self.config[@"parent"]];
   if (!_parentNode) {
     return;
   }
 
   CGFloat inputValue = _parentNode.value;
+  
+  if (_isOutputRangeAnimations) {
+    NSUInteger rangeIndex = RCTFindIndexOfNearestValue(inputValue, _inputRange);
+    CGFloat inputMin = _inputRange[rangeIndex].doubleValue;
+    CGFloat inputMax = _inputRange[rangeIndex + 1].doubleValue;
 
+    NSNumber *minTag = _outputRange[rangeIndex];
+    RCTValueAnimatedNode *outputMin = (RCTValueAnimatedNode *)[self.parentNodes objectForKey:minTag];
+
+    NSNumber *maxTag = _outputRange[rangeIndex + 1];
+    RCTValueAnimatedNode *outputMax = (RCTValueAnimatedNode *)[self.parentNodes objectForKey:maxTag];
+
+    CGFloat outputMinValue = outputMin.value;
+    CGFloat outputMaxValue = outputMax.value;
+
+    self.value = RCTInterpolateValue(inputValue,
+                               inputMin,
+                               inputMax,
+                               outputMinValue,
+                               outputMaxValue,
+                               _extrapolateLeft,
+                               _extrapolateRight);
+    return;
+  }
+  
   self.value = RCTInterpolateValueInRange(inputValue,
                                           _inputRange,
                                           _outputRange,

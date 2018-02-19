@@ -6,6 +6,7 @@
  */
 package com.facebook.react.animated;
 
+import com.facebook.react.bridge.JSApplicationCausedNativeException;
 import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -21,6 +22,14 @@ import javax.annotation.Nullable;
   public static final String EXTRAPOLATE_TYPE_IDENTITY = "identity";
   public static final String EXTRAPOLATE_TYPE_CLAMP = "clamp";
   public static final String EXTRAPOLATE_TYPE_EXTEND = "extend";
+
+  private static int[] fromIntArray(ReadableArray ary) {
+    int[] res = new int[ary.size()];
+    for (int i = 0; i < res.length; i++) {
+      res[i] = ary.getInt(i);
+    }
+    return res;
+  }
 
   private static double[] fromDoubleArray(ReadableArray ary) {
     double[] res = new double[ary.size()];
@@ -79,16 +88,35 @@ import javax.annotation.Nullable;
       double value,
       double[] inputRange,
       double[] outputRange,
+      int[] outputRangeAnimations,
       String extrapolateLeft,
-      String extrapolateRight
+      String extrapolateRight,
+      NativeAnimatedNodesManager nativeAnimatedNodesManager
   ) {
     int rangeIndex = findRangeIndex(value, inputRange);
+    double outputStartValue;
+    double outputEndValue;
+    if (outputRangeAnimations != null) {
+      AnimatedNode outputStart = nativeAnimatedNodesManager.getNodeById(outputRangeAnimations[rangeIndex]);
+      AnimatedNode outputEnd = nativeAnimatedNodesManager.getNodeById(outputRangeAnimations[rangeIndex + 1]);
+      Boolean startIsInvalid = outputStart == null || !(outputStart instanceof ValueAnimatedNode);
+      Boolean endIsInvalid = outputEnd == null || !(outputEnd instanceof ValueAnimatedNode);
+      if (startIsInvalid || endIsInvalid) {
+        throw new JSApplicationCausedNativeException("Illegal node ID set as an input for " +
+                "Animated.Add node");
+      }
+      outputStartValue = ((ValueAnimatedNode) outputStart).getValue();
+      outputEndValue = ((ValueAnimatedNode) outputEnd).getValue();
+    } else {
+        outputStartValue = outputRange[rangeIndex];
+        outputEndValue = outputRange[rangeIndex + 1];
+    }
     return interpolate(
       value,
       inputRange[rangeIndex],
       inputRange[rangeIndex + 1],
-      outputRange[rangeIndex],
-      outputRange[rangeIndex + 1],
+      outputStartValue,
+      outputEndValue,
       extrapolateLeft,
       extrapolateRight);
   }
@@ -103,36 +131,30 @@ import javax.annotation.Nullable;
     return index - 1;
   }
 
+  private @Nullable ValueAnimatedNode mParent;
+  private final NativeAnimatedNodesManager mNativeAnimatedNodesManager;
   private final double mInputRange[];
   private final double mOutputRange[];
+  private final int mOutputRangeAnimations[];
   private final String mExtrapolateLeft;
   private final String mExtrapolateRight;
-  private @Nullable ValueAnimatedNode mParent;
 
-  public InterpolationAnimatedNode(ReadableMap config) {
+  public InterpolationAnimatedNode(
+          ReadableMap config,
+          NativeAnimatedNodesManager nativeAnimatedNodesManager) {
+    mNativeAnimatedNodesManager = nativeAnimatedNodesManager;
+    mParent = (ValueAnimatedNode) nativeAnimatedNodesManager.getNodeById(config.getInt("parent"));
     mInputRange = fromDoubleArray(config.getArray("inputRange"));
-    mOutputRange = fromDoubleArray(config.getArray("outputRange"));
+    Boolean isOutputRangeAnimations = config.getBoolean("isOutputRangeAnimations");
+    if (isOutputRangeAnimations) {
+      mOutputRangeAnimations = fromIntArray(config.getArray("outputRange"));
+      mOutputRange = null;
+    } else {
+      mOutputRange = fromDoubleArray(config.getArray("outputRange"));
+      mOutputRangeAnimations = null;
+    }
     mExtrapolateLeft = config.getString("extrapolateLeft");
     mExtrapolateRight = config.getString("extrapolateRight");
-  }
-
-  @Override
-  public void onAttachedToNode(AnimatedNode parent) {
-    if (mParent != null) {
-      throw new IllegalStateException("Parent already attached");
-    }
-    if (!(parent instanceof ValueAnimatedNode)) {
-      throw new IllegalArgumentException("Parent is of an invalid type");
-    }
-    mParent = (ValueAnimatedNode) parent;
-  }
-
-  @Override
-  public void onDetachedFromNode(AnimatedNode parent) {
-    if (parent != mParent) {
-      throw new IllegalArgumentException("Invalid parent node provided");
-    }
-    mParent = null;
   }
 
   @Override
@@ -142,6 +164,14 @@ import javax.annotation.Nullable;
       // unattached node.
       return;
     }
-    mValue = interpolate(mParent.getValue(), mInputRange, mOutputRange, mExtrapolateLeft, mExtrapolateRight);
+    mValue = interpolate(
+            mParent.getValue(),
+            mInputRange,
+            mOutputRange,
+            mOutputRangeAnimations,
+            mExtrapolateLeft,
+            mExtrapolateRight,
+            mNativeAnimatedNodesManager
+    );
   }
 }

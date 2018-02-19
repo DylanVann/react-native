@@ -26,7 +26,7 @@ export type InterpolationConfigType = {
    * detected during the deployment of v0.38.0. To see the error, remove this
    * comment and run flow
    */
-  outputRange: Array<number> | Array<string>,
+  outputRange: Array<number> | Array<string> | Array<AnimatedNode>,
   easing?: (input: number) => number,
   extrapolate?: ExtrapolateType,
   extrapolateLeft?: ExtrapolateType,
@@ -34,6 +34,10 @@ export type InterpolationConfigType = {
 };
 
 const linear = t => t;
+
+function isAnimatedNode(value) {
+  return value instanceof AnimatedNode;
+}
 
 /**
  * Very handy helper to map input ranges to output ranges with an easing
@@ -46,7 +50,7 @@ function createInterpolation(
     return createInterpolationFromStringOutputRange(config);
   }
 
-  const outputRange: Array<number> = (config.outputRange: any);
+  const outputRange: Array<number> | Array<AnimatedNode> = config.outputRange;
   checkInfiniteRange('outputRange', outputRange);
 
   const inputRange = config.inputRange;
@@ -85,12 +89,20 @@ function createInterpolation(
     );
 
     const range = findRange(input, inputRange);
+    const outputStart: number | AnimatedNode = outputRange[range];
+    const outputEnd: number | AnimatedNode = outputRange[range + 1];
+    const outputStartValue =
+      outputStart instanceof AnimatedNode
+        ? outputStart.__getValue()
+        : outputStart;
+    const outputEndValue =
+      outputEnd instanceof AnimatedNode ? outputEnd.__getValue() : outputEnd;
     return interpolate(
       input,
       inputRange[range],
       inputRange[range + 1],
-      outputRange[range],
-      outputRange[range + 1],
+      outputStartValue,
+      outputEndValue,
       easing,
       extrapolateLeft,
       extrapolateRight,
@@ -291,7 +303,7 @@ function checkValidInputRange(arr: Array<number>) {
   }
 }
 
-function checkInfiniteRange(name: string, arr: Array<number>) {
+function checkInfiniteRange(name: string, arr: Array<any>) {
   invariant(arr.length >= 2, name + ' must have at least 2 elements');
   invariant(
     arr.length !== 2 || arr[0] !== -Infinity || arr[1] !== Infinity,
@@ -320,8 +332,11 @@ class AnimatedInterpolation extends AnimatedWithChildren {
     this._interpolation = createInterpolation(config);
   }
 
-  __makeNative() {
+  __makeNative(): void {
     this._parent.__makeNative();
+    this._config.outputRange.filter(isAnimatedNode).forEach(function(value) {
+      value.__makeNative();
+    });
     super.__makeNative();
   }
 
@@ -339,29 +354,49 @@ class AnimatedInterpolation extends AnimatedWithChildren {
   }
 
   __attach(): void {
-    this._parent.__addChild(this);
+    const self = this;
+    this._parent.__addChild(self);
+    this._config.outputRange.filter(isAnimatedNode).forEach(function(value) {
+      value.__addChild(self);
+    });
   }
 
   __detach(): void {
-    this._parent.__removeChild(this);
+    const self = this;
+    this._parent.__removeChild(self);
+    this._config.outputRange.filter(isAnimatedNode).forEach(function(value) {
+      value.__removeChild(self);
+    });
     super.__detach();
   }
 
-  __transformDataType(range: Array<any>) {
-    // Change the string array type to number array
-    // So we can reuse the same logic in iOS and Android platform
+  __transformOutputRange(
+    range: Array<number | string | AnimatedNode>,
+  ): Array<number> {
+    // Change strings and numbers to AnimatedValue.
+    // This way things can be handled uniformly on native.
     return range.map(function(value) {
-      if (typeof value !== 'string') {
-        return value;
-      }
-      if (/deg$/.test(value)) {
+      if (typeof value === 'string' && /deg$/.test(value)) {
         const degrees = parseFloat(value) || 0;
-        const radians = degrees * Math.PI / 180.0;
-        return radians;
-      } else {
-        // Assume radians
+        // Radians.
+        return degrees * Math.PI / 180.0;
+      }
+      if (typeof value === 'string') {
+        // Assume radians.
         return parseFloat(value) || 0;
       }
+      if (typeof value === 'number') {
+        // Just a plain number value.
+        return value;
+      }
+      // Animated node.
+      if (value instanceof AnimatedNode) {
+        const tag = value.__getNativeTag();
+        invariant(tag, 'There must be a native tag for this value.');
+        return tag;
+      }
+      invariant(true, 'Incompatible type passed to outputRange.');
+      return 0;
     });
   }
 
@@ -371,9 +406,11 @@ class AnimatedInterpolation extends AnimatedWithChildren {
     }
 
     return {
+      parent: this._parent.__getNativeTag(),
       inputRange: this._config.inputRange,
       // Only the `outputRange` can contain strings so we don't need to transform `inputRange` here
-      outputRange: this.__transformDataType(this._config.outputRange),
+      outputRange: this.__transformOutputRange(this._config.outputRange),
+      isOutputRangeAnimations: isAnimatedNode(this._config.outputRange[0]),
       extrapolateLeft:
         this._config.extrapolateLeft || this._config.extrapolate || 'extend',
       extrapolateRight:
