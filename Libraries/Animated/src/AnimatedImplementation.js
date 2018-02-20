@@ -230,7 +230,7 @@ const interpolate = function(
   value: AnimatedValue,
   config: InterpolationConfigType,
 ): AnimatedInterpolation {
-  return new AnimatedInterpolation(this, config);
+  return new AnimatedInterpolation(value, config);
 };
 
 const decay = function(
