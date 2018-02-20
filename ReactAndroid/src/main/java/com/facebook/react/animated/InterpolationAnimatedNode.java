@@ -102,8 +102,8 @@ import javax.annotation.Nullable;
       Boolean startIsInvalid = outputStart == null || !(outputStart instanceof ValueAnimatedNode);
       Boolean endIsInvalid = outputEnd == null || !(outputEnd instanceof ValueAnimatedNode);
       if (startIsInvalid || endIsInvalid) {
-        throw new JSApplicationCausedNativeException("Illegal node ID set as an input for " +
-                "Animated.Add node");
+        String error = "Illegal node ID set in outputRange of Animated.interpolate node";
+        throw new JSApplicationCausedNativeException(error);
       }
       outputStartValue = ((ValueAnimatedNode) outputStart).getValue();
       outputEndValue = ((ValueAnimatedNode) outputEnd).getValue();
