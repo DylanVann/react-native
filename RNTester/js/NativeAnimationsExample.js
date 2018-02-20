@@ -315,7 +315,8 @@ class TrackingExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> 
 }
 
 class InterpolatedExample extends React.Component<$FlowFixMeProps, $FlowFixMeState> {
-  value = 0
+  _value = 0
+  _animationInterval: ?IntervalID;
   constructor(props) {
     super(props);
     this.state = {
@@ -337,18 +338,18 @@ class InterpolatedExample extends React.Component<$FlowFixMeProps, $FlowFixMeSta
   }
 
   animate = () => {
-    this.value = this.value === 0 ? 1 : 0;
+    this._value = this._value === 0 ? 1 : 0;
     Animated.spring(
       this.state.native,
       {
-        toValue: this.value,
+        toValue: this._value,
         useNativeDriver: true,
       },
     ).start();
     Animated.spring(
       this.state.js,
       {
-        toValue: this.value,
+        toValue: this._value,
       },
     ).start();
   }
@@ -373,14 +374,16 @@ class InterpolatedExample extends React.Component<$FlowFixMeProps, $FlowFixMeSta
   }
 
   componentDidMount() {
-    this.timerID = setInterval(
+    this._animationInterval = setInterval(
       this.animate,
       1000
     );
   }
 
   componentWillUnmount() {
-    clearInterval(this.timerID);
+    if (this._animationInterval) {
+      clearInterval(this._animationInterval);
+    }
   }
 
   onPress = () => {
