@@ -38,6 +38,7 @@ import type {TimingAnimationConfig} from './animations/TimingAnimation';
 import type {DecayAnimationConfig} from './animations/DecayAnimation';
 import type {SpringAnimationConfig} from './animations/SpringAnimation';
 import type {Mapping, EventConfig} from './AnimatedEvent';
+import type {InterpolationConfigType} from './nodes/AnimatedInterpolation';
 
 type CompositeAnimation = {
   start: (callback?: ?EndCallback) => void,
@@ -223,6 +224,13 @@ const timing = function(
       },
     }
   );
+};
+
+const interpolate = function(
+  value: AnimatedValue,
+  config: InterpolationConfigType,
+): AnimatedInterpolation {
+  return new AnimatedInterpolation(this, config);
 };
 
 const decay = function(
@@ -537,6 +545,12 @@ module.exports = {
    * See http://facebook.github.io/react-native/docs/animated.html#node
    */
   Node: AnimatedNode,
+
+  /**
+   * Interpolates the value before updating the property, e.g. mapping 0-1 to
+   * 0-10.
+   */
+  interpolate,
 
   /**
    * Animates a value from an initial velocity to zero based on a decay

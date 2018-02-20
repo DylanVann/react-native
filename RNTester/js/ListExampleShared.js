@@ -134,7 +134,7 @@ class Spindicator extends React.PureComponent<$FlowFixMeProps> {
     return (
       <Animated.View style={[styles.spindicator, {
         transform: [
-          {rotate: this.props.value.interpolate({
+          {rotate: Animated.interpolate(this.props.value, {
             inputRange: [0, 5000],
             outputRange: ['0deg', '360deg'],
             extrapolate: 'extend',

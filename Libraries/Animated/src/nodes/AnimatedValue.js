@@ -31,11 +31,11 @@ let _uniqueId = 1;
  * transparently when you render your Animated components.
  *
  *               new Animated.Value(0)
- *     .interpolate()        .interpolate()    new Animated.Value(1)
- *         opacity               translateY      scale
- *          style                         transform
- *         View#234                         style
- *                                         View#123
+ *     Animated.interpolate()     Animated.interpolate()    new Animated.Value(1)
+ *         opacity                       translateY              scale
+ *          style                                    transform
+ *         View#234                                    style
+ *                                                    View#123
  *
  * A) Top Down phase
  * When an Animated.Value is updated, we recursively go down through this
@@ -256,14 +256,6 @@ class AnimatedValue extends AnimatedWithChildren {
   resetAnimation(callback?: ?(value: number) => void): void {
     this.stopAnimation(callback);
     this._value = this._startingValue;
-  }
-
-  /**
-   * Interpolates the value before updating the property, e.g. mapping 0-1 to
-   * 0-10.
-   */
-  interpolate(config: InterpolationConfigType): AnimatedInterpolation {
-    return new AnimatedInterpolation(this, config);
   }
 
   /**

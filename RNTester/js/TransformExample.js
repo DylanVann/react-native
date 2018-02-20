@@ -42,7 +42,7 @@ class Flip extends React.Component<{}, $FlowFixMeState> {
           styles.flipCard,
           {transform: [
             {perspective: 850},
-            {rotateX: this.state.theta.interpolate({
+            {rotateX: Animated.interpolate(this.state.theta, {
               inputRange: [0, 180],
               outputRange: ['0deg', '180deg']
             })},
@@ -57,7 +57,7 @@ class Flip extends React.Component<{}, $FlowFixMeState> {
           backgroundColor: 'red',
           transform: [
             {perspective: 850},
-            {rotateX: this.state.theta.interpolate({
+            {rotateX: Animated.interpolate(this.state.theta, {
               inputRange: [0, 180],
               outputRange: ['180deg', '360deg']
             })},

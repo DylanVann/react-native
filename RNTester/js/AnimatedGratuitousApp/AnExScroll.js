@@ -56,21 +56,21 @@ class AnExScroll extends React.Component<$FlowFixMeProps, any> {
           pointerEvents="none"
           style={[styles.bunny, {transform: [
             {
-              translateX: this.state.scrollX.interpolate({
+              translateX: Animated.interpolate(this.state.scrollX, {
                 inputRange: [0, width, 2 * width],
                 outputRange: [0, 0, width / 3],
                 extrapolate: 'clamp',
               }),
             },
             {
-              translateY: this.state.scrollX.interpolate({
+              translateY: Animated.interpolate(this.state.scrollX, {
                 inputRange: [0, width, 2 * width],
                 outputRange: [0, -200, -260],
                 extrapolate: 'clamp',
               }),
             },
             {
-              scale: this.state.scrollX.interpolate({
+              scale: Animated.interpolate(this.state.scrollX, {
                 inputRange: [0, width, 2 * width],
                 outputRange: [0.5, 0.5, 2],
                 extrapolate: 'clamp',

@@ -113,15 +113,15 @@ exports.examples = [
           <Animated.View
             style={[styles.content, {
               transform: [   // Array order matters
-                {scale: this.anim.interpolate({
+                {scale: Animated.interpolate(this.anim, {
                   inputRange: [0, 1],
                   outputRange: [1, 4],
                 })},
-                {translateX: this.anim.interpolate({
+                {translateX: Animated.interpolate(this.anim, {
                   inputRange: [0, 1],
                   outputRange: [0, 500],
                 })},
-                {rotate: this.anim.interpolate({
+                {rotate: Animated.interpolate(this.anim, {
                   inputRange: [0, 1],
                   outputRange: [
                     '0deg', '360deg' // 'deg' or 'rad'

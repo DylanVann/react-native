@@ -132,7 +132,7 @@ class ScrollViewStickyHeader extends React.Component<Props, State> {
       }
     }
 
-    const translateY = this.props.scrollAnimatedValue.interpolate({
+    const translateY = Animated.interpolate(this.props.scrollAnimatedValue, {
       inputRange,
       outputRange,
     });

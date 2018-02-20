@@ -133,7 +133,7 @@ class MaskedViewExample extends React.Component<{}, $FlowFixMeState> {
                   flex: 1,
                   transform: [
                     {
-                      rotate: this._maskRotateAnimatedValue.interpolate({
+                      rotate: Animated.interpolate(this._maskRotateAnimatedValue, {
                         inputRange: [0, 360],
                         outputRange: ['0deg', '360deg'],
                       }),

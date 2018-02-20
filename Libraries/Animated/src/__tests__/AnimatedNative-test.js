@@ -429,7 +429,7 @@ describe('Native Animated', () => {
 
       createAndMountComponent(Animated.View, {
         style: {
-          opacity: value.interpolate({
+          opacity: Animated.interpolate(value, {
             inputRange: [10, 20],
             outputRange: [0, 1],
           }),
