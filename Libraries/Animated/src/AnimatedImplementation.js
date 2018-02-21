@@ -40,6 +40,25 @@ import type {SpringAnimationConfig} from './animations/SpringAnimation';
 import type {Mapping, EventConfig} from './AnimatedEvent';
 import type {InterpolationConfigType} from './nodes/AnimatedInterpolation';
 
+/**
+ * Interpolates the value before updating the property, e.g. mapping 0-1 to
+ * 0-10.
+ *
+ * @deprecated
+ */
+const interpolateMethod = function (config: InterpolationConfigType): AnimatedInterpolation {
+  console.warn('The animation.interpolate(config) method will be removed from animated nodes in favour of Animated.interpolate(animation, config).');
+  return new AnimatedInterpolation(this, config);
+}
+
+AnimatedAddition.prototype.interpolate = interpolateMethod;
+AnimatedDiffClamp.prototype.interpolate = interpolateMethod;
+AnimatedDivision.prototype.interpolate = interpolateMethod;
+AnimatedInterpolation.prototype.interpolate = interpolateMethod;
+AnimatedModulo.prototype.interpolate = interpolateMethod;
+AnimatedMultiplication.prototype.interpolate = interpolateMethod;
+AnimatedValue.prototype.interpolate = interpolateMethod;
+
 type CompositeAnimation = {
   start: (callback?: ?EndCallback) => void,
   stop: () => void,
