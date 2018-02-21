@@ -373,8 +373,6 @@ class AnimatedInterpolation extends AnimatedWithChildren {
   __transformOutputRange(
     range: Array<number | string | AnimatedNode>,
   ): Array<number> {
-    // Change strings and numbers to AnimatedValue.
-    // This way things can be handled uniformly on native.
     return range.map(function(value) {
       if (typeof value === 'string' && /deg$/.test(value)) {
         const degrees = parseFloat(value) || 0;
