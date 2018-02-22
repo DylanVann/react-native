@@ -34,6 +34,14 @@ class AnimatedNode {
     return [];
   }
 
+  /**
+   * Deprecated - Use `Animated.interpolate(animation, config)` instead.
+   *
+   * Interpolates the value before updating the property, e.g. mapping 0-1 to
+   * 0-10. Not available on all node types.
+   *
+   * @deprecated
+   */
   interpolate(config: any): AnimatedNode {
     throw new Error(
       'This node type does not implement an interpolate method,' +
