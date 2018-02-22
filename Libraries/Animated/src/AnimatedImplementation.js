@@ -51,6 +51,9 @@ const interpolateMethod = function (config: InterpolationConfigType): AnimatedIn
   return new AnimatedInterpolation(this, config);
 }
 
+// To avoid some code duplication and a circular dependency we
+// are adding the interpolate method directly onto these prototypes.
+// This should eventually be removed.
 //$FlowFixMe
 AnimatedAddition.prototype.interpolate = interpolateMethod;
 //$FlowFixMe
