@@ -51,12 +51,19 @@ const interpolateMethod = function (config: InterpolationConfigType): AnimatedIn
   return new AnimatedInterpolation(this, config);
 }
 
+//$FlowFixMe
 AnimatedAddition.prototype.interpolate = interpolateMethod;
+//$FlowFixMe
 AnimatedDiffClamp.prototype.interpolate = interpolateMethod;
+//$FlowFixMe
 AnimatedDivision.prototype.interpolate = interpolateMethod;
+//$FlowFixMe
 AnimatedInterpolation.prototype.interpolate = interpolateMethod;
+//$FlowFixMe
 AnimatedModulo.prototype.interpolate = interpolateMethod;
+//$FlowFixMe
 AnimatedMultiplication.prototype.interpolate = interpolateMethod;
+//$FlowFixMe
 AnimatedValue.prototype.interpolate = interpolateMethod;
 
 type CompositeAnimation = {
