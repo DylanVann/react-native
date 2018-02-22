@@ -442,13 +442,12 @@ describe('Native Animated', () => {
       );
       expect(nativeAnimatedModule.createAnimatedNode)
         .toBeCalledWith(expect.any(Number), {
-          parent: expect.any(Number),
           type: 'interpolation',
+          parent: expect.any(Number),
           inputRange: [10, 20],
-          outputRange: [0, 1],
+          outputRange: [expect.any(Number), expect.any(Number)],
           extrapolateLeft: 'extend',
           extrapolateRight: 'extend',
-          isOutputRangeAnimations: false,
         });
       const interpolationNodeTag = nativeAnimatedModule.createAnimatedNode.mock.calls.find(
         (call) => call[1].type === 'interpolation'

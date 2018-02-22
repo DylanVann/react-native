@@ -12,6 +12,7 @@
 'use strict';
 
 const AnimatedNode = require('./AnimatedNode');
+const AnimatedValue = require('./AnimatedValue');
 const AnimatedWithChildren = require('./AnimatedWithChildren');
 const NativeAnimatedHelper = require('../NativeAnimatedHelper');
 
@@ -34,10 +35,6 @@ export type InterpolationConfigType = {
 };
 
 const linear = t => t;
-
-function isAnimatedNode(value) {
-  return value instanceof AnimatedNode;
-}
 
 /**
  * Very handy helper to map input ranges to output ranges with an easing
@@ -323,18 +320,22 @@ class AnimatedInterpolation extends AnimatedWithChildren {
 
   _parent: AnimatedNode;
   _config: InterpolationConfigType;
+  _transformedOutputRange: Array<AnimatedNode>;
   _interpolation: (input: number) => number | string;
 
   constructor(parent: AnimatedNode, config: InterpolationConfigType) {
     super();
     this._parent = parent;
     this._config = config;
+    this._transformedOutputRange = this.__transformOutputRangeToAnimatedValues(
+      config.outputRange,
+    );
     this._interpolation = createInterpolation(config);
   }
 
   __makeNative(): void {
     this._parent.__makeNative();
-    this._config.outputRange.filter(isAnimatedNode).forEach(function(value) {
+    this._transformedOutputRange.forEach(function(value) {
       value.__makeNative();
     });
     super.__makeNative();
@@ -350,47 +351,53 @@ class AnimatedInterpolation extends AnimatedWithChildren {
   }
 
   __attach(): void {
-    const self = this;
-    this._parent.__addChild(self);
-    this._config.outputRange.filter(isAnimatedNode).forEach(function(value) {
-      value.__addChild(self);
+    const that = this;
+    this._parent.__addChild(that);
+    this._transformedOutputRange.forEach(function(value) {
+      value.__addChild(that);
     });
   }
 
   __detach(): void {
-    const self = this;
-    this._parent.__removeChild(self);
-    this._config.outputRange.filter(isAnimatedNode).forEach(function(value) {
-      value.__removeChild(self);
+    const that = this;
+    this._parent.__removeChild(that);
+    this._transformedOutputRange.forEach(function(value) {
+      value.__removeChild(that);
     });
     super.__detach();
   }
 
-  __transformOutputRange(
+  __transformOutputRangeToAnimatedValues(
     range: Array<number | string | AnimatedNode>,
-  ): Array<number> {
+  ): Array<AnimatedNode> {
     return range.map(function(value) {
       if (typeof value === 'string' && /deg$/.test(value)) {
         const degrees = parseFloat(value) || 0;
         // Radians.
-        return degrees * Math.PI / 180.0;
+        const radians = degrees * Math.PI / 180.0;
+        return new AnimatedValue(radians);
       }
       if (typeof value === 'string') {
         // Assume radians.
-        return parseFloat(value) || 0;
+        const radians = parseFloat(value) || 0;
+        return new AnimatedValue(radians);
       }
       if (typeof value === 'number') {
         // Just a plain number value.
+        return new AnimatedValue(value);
+      }
+      if (value instanceof AnimatedNode) {
         return value;
       }
-      // Animated node.
-      if (value instanceof AnimatedNode) {
-        const tag = value.__getNativeTag();
-        invariant(tag, 'There must be a native tag for this value.');
-        return tag;
-      }
-      invariant(true, 'Incompatible type passed to outputRange.');
-      return 0;
+      throw new Error('Incompatible type passed to outputRange.');
+    });
+  }
+
+  __outputRangeToTags(range: Array<AnimatedNode>): Array<number> {
+    return range.map(function(value) {
+      const tag = value.__getNativeTag();
+      invariant(tag, 'There must be a native tag for this value.');
+      return tag;
     });
   }
 
@@ -400,16 +407,14 @@ class AnimatedInterpolation extends AnimatedWithChildren {
     }
 
     return {
+      type: 'interpolation',
       parent: this._parent.__getNativeTag(),
       inputRange: this._config.inputRange,
-      // Only the `outputRange` can contain strings so we don't need to transform `inputRange` here
-      outputRange: this.__transformOutputRange(this._config.outputRange),
-      isOutputRangeAnimations: isAnimatedNode(this._config.outputRange[0]),
+      outputRange: this.__outputRangeToTags(this._transformedOutputRange),
       extrapolateLeft:
         this._config.extrapolateLeft || this._config.extrapolate || 'extend',
       extrapolateRight:
         this._config.extrapolateRight || this._config.extrapolate || 'extend',
-      type: 'interpolation',
     };
   }
 }

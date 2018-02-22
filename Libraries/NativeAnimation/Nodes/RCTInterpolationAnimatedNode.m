@@ -14,7 +14,6 @@
   __weak RCTValueAnimatedNode *_parentNode;
   NSArray<NSNumber *> *_inputRange;
   NSArray<NSNumber *> *_outputRange;
-  BOOL _isOutputRangeAnimations;
   NSString *_extrapolateLeft;
   NSString *_extrapolateRight;
 }
@@ -30,7 +29,6 @@
         [outputRange addObject:value];
       }
     }
-    _isOutputRangeAnimations = ((NSNumber *)config[@"isOutputRangeAnimations"]).boolValue;
     _outputRange = [outputRange copy];
     _extrapolateLeft = config[@"extrapolateLeft"];
     _extrapolateRight = config[@"extrapolateRight"];
@@ -45,38 +43,29 @@
   if (!_parentNode) {
     return;
   }
-
+  
   CGFloat inputValue = _parentNode.value;
   
-  if (_isOutputRangeAnimations) {
-    NSUInteger rangeIndex = RCTFindIndexOfNearestValue(inputValue, _inputRange);
-    CGFloat inputMin = _inputRange[rangeIndex].doubleValue;
-    CGFloat inputMax = _inputRange[rangeIndex + 1].doubleValue;
-
-    NSNumber *minTag = _outputRange[rangeIndex];
-    RCTValueAnimatedNode *outputMin = (RCTValueAnimatedNode *)[self.parentNodes objectForKey:minTag];
-
-    NSNumber *maxTag = _outputRange[rangeIndex + 1];
-    RCTValueAnimatedNode *outputMax = (RCTValueAnimatedNode *)[self.parentNodes objectForKey:maxTag];
-
-    CGFloat outputMinValue = outputMin.value;
-    CGFloat outputMaxValue = outputMax.value;
-
-    self.value = RCTInterpolateValue(inputValue,
-                               inputMin,
-                               inputMax,
-                               outputMinValue,
-                               outputMaxValue,
-                               _extrapolateLeft,
-                               _extrapolateRight);
-    return;
-  }
+  NSUInteger rangeIndex = RCTFindIndexOfNearestValue(inputValue, _inputRange);
+  CGFloat inputMin = _inputRange[rangeIndex].doubleValue;
+  CGFloat inputMax = _inputRange[rangeIndex + 1].doubleValue;
   
-  self.value = RCTInterpolateValueInRange(inputValue,
-                                          _inputRange,
-                                          _outputRange,
-                                          _extrapolateLeft,
-                                          _extrapolateRight);
+  NSNumber *minTag = _outputRange[rangeIndex];
+  RCTValueAnimatedNode *outputMin = (RCTValueAnimatedNode *)[self.parentNodes objectForKey:minTag];
+  
+  NSNumber *maxTag = _outputRange[rangeIndex + 1];
+  RCTValueAnimatedNode *outputMax = (RCTValueAnimatedNode *)[self.parentNodes objectForKey:maxTag];
+  
+  CGFloat outputMinValue = outputMin.value;
+  CGFloat outputMaxValue = outputMax.value;
+  
+  self.value = RCTInterpolateValue(inputValue,
+                                   inputMin,
+                                   inputMax,
+                                   outputMinValue,
+                                   outputMaxValue,
+                                   _extrapolateLeft,
+                                   _extrapolateRight);
 }
 
 @end
