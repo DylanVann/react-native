@@ -26,7 +26,7 @@ describe('Animated tests', () => {
           backgroundColor: 'red',
           opacity: anim,
           transform: [
-            {translateX: Animated.interpolate(anim, {
+            {translateX: anim.interpolate({
               inputRange: [0, 1],
               outputRange: [100, 200],
             })},
@@ -631,7 +631,7 @@ describe('Animated tests', () => {
       var value1 = new Animated.Value(0);
       var value2 = new Animated.Value(0);
       Animated.timing(value2, {
-        toValue: Animated.interpolate(value1, {
+        toValue: value1.interpolate({
           inputRange: [0, 2],
           outputRange: [0, 1]
         }),
@@ -667,7 +667,7 @@ describe('Animated tests', () => {
 
       var node = new Animated.__PropsOnlyForTests({
         style: {
-          opacity: Animated.interpolate(vec.x, {
+          opacity: vec.x.interpolate({
             inputRange: [0, 42],
             outputRange: [0.2, 0.8],
           }),

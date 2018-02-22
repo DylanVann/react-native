@@ -29,7 +29,7 @@ class AnExTilt extends React.Component<Object, any> {
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
         Animated.timing(this.state.opacity, {
-          toValue: Animated.interpolate(this.state.panX, {
+          toValue: this.state.panX.interpolate({
             inputRange: [-300, 0, 300],            // pan is in pixels
             outputRange: [0, 1, 0],                // goes to zero at both edges
           }),
@@ -86,7 +86,7 @@ class AnExTilt extends React.Component<Object, any> {
         style={[styles.tilt, {
           opacity: this.state.opacity,
           transform: [
-            {rotate: Animated.interpolate(this.state.panX, {
+            {rotate: this.state.panX.interpolate({
               inputRange: [-320, 320],
               outputRange: ['-15deg', '15deg']})},  // interpolate string "shapes"
             {translateX: this.state.panX},
@@ -97,11 +97,11 @@ class AnExTilt extends React.Component<Object, any> {
           style={{
             flex: 1,
             transform: [
-              {translateX: Animated.interpolate(this.state.panX, {
+              {translateX: this.state.panX.interpolate({
                 inputRange: [-3, 3],     // small range is extended by default
                 outputRange: [2, -2]})   // parallax
               },
-              {scale: Animated.interpolate(this.state.burns, {
+              {scale: this.state.burns.interpolate({
                 inputRange: [1, 3000],
                 outputRange: [1, 1.25]}) // simple multiplier
               },

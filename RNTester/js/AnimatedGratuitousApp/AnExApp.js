@@ -106,7 +106,7 @@ class Circle extends React.Component<any, any> {
     var animatedStyle: Object = {
       shadowOpacity: this.state.pop,    // no need for interpolation            (step2d: uncomment)
       transform: [
-        {scale: Animated.interpolate(this.state.pop, {
+        {scale: this.state.pop.interpolate({
           inputRange: [0, 1],
           outputRange: [1, 1.3]         // scale up from 1 to 1.3               (step2d: uncomment)
         })},
@@ -117,12 +117,12 @@ class Circle extends React.Component<any, any> {
       animatedStyle.opacity = 0;
     } else if (this.state.isActive) {
       var innerOpenStyle = [styles.open, {                                 // (step4: uncomment)
-        left: Animated.interpolate(openVal, {inputRange: [0, 1], outputRange: [this.props.restLayout.x, 0]}),
-        top: Animated.interpolate(openVal, {inputRange: [0, 1], outputRange: [this.props.restLayout.y, 0]}),
-        width: Animated.interpolate(openVal, {inputRange: [0, 1], outputRange: [CIRCLE_SIZE, this.props.containerLayout.width]}),
-        height: Animated.interpolate(openVal, {inputRange: [0, 1], outputRange: [CIRCLE_SIZE, this.props.containerLayout.height]}),
-        margin: Animated.interpolate(openVal, {inputRange: [0, 1], outputRange: [CIRCLE_MARGIN, 0]}),
-        borderRadius: Animated.interpolate(openVal, {inputRange: [-0.15, 0, 0.5, 1], outputRange: [0, CIRCLE_SIZE / 2, CIRCLE_SIZE * 1.3, 0]}),
+        left: openVal.interpolate({inputRange: [0, 1], outputRange: [this.props.restLayout.x, 0]}),
+        top: openVal.interpolate({inputRange: [0, 1], outputRange: [this.props.restLayout.y, 0]}),
+        width: openVal.interpolate({inputRange: [0, 1], outputRange: [CIRCLE_SIZE, this.props.containerLayout.width]}),
+        height: openVal.interpolate({inputRange: [0, 1], outputRange: [CIRCLE_SIZE, this.props.containerLayout.height]}),
+        margin: openVal.interpolate({inputRange: [0, 1], outputRange: [CIRCLE_MARGIN, 0]}),
+        borderRadius: openVal.interpolate({inputRange: [-0.15, 0, 0.5, 1], outputRange: [0, CIRCLE_SIZE / 2, CIRCLE_SIZE * 1.3, 0]}),
       }];
     }
     return (

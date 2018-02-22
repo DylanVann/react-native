@@ -38,7 +38,7 @@ class AnExSet extends React.Component<Object, any> {
   }
   render(): React.Node {
     var backgroundColor = this.props.openVal ?
-      Animated.interpolate(this.props.openVal, {
+      this.props.openVal.interpolate({
         inputRange: [0, 1],
         outputRange: [
           this.state.closeColor,  // interpolates color strings
@@ -79,7 +79,7 @@ class AnExSet extends React.Component<Object, any> {
       onStartShouldSetPanResponder: () => this.props.isActive,
       onPanResponderGrant: () => {
         Animated.spring(this.props.openVal, {          // Animated value passed in.
-          toValue: Animated.interpolate(this.state.dismissY, {   // Track dismiss gesture
+          toValue: this.state.dismissY.interpolate({   // Track dismiss gesture
             inputRange: [0, 300],                      // and interpolate pixel distance
             outputRange: [1, 0],                       // to a fraction.
           }),

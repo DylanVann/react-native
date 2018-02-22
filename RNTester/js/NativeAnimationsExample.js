@@ -143,7 +143,7 @@ class LoopExample extends React.Component<{}, $FlowFixMeState> {
           style={[
             styles.block,
             {
-              opacity: Animated.interpolate(this.state.value, {
+              opacity: this.state.value.interpolate({
                 inputRange: [0, 0.5, 1],
                 outputRange: [0, 1, 0],
               }),
@@ -217,7 +217,7 @@ class EventExample extends React.Component<{}, $FlowFixMeState> {
   };
 
   render() {
-    const opacity = Animated.interpolate(this.state.scrollX, {
+    const opacity = this.state.scrollX.interpolate({
       inputRange: [0, 200],
       outputRange: [1, 0],
     });
@@ -458,30 +458,30 @@ exports.examples = [
                 {
                   transform: [
                     {
-                      translateX: Animated.interpolate(anim, {
+                      translateX: anim.interpolate({
                         inputRange: [0, 1],
                         outputRange: [0, 200],
                       }),
                     },
                     {
-                      translateY: Animated.interpolate(anim, {
+                      translateY: anim.interpolate({
                         inputRange: [0, 0.5, 1],
                         outputRange: [0, 50, 0],
                       }),
                     },
                     {
-                      rotate: Animated.interpolate(anim, {
+                      rotate: anim.interpolate({
                         inputRange: [0, 0.5, 1],
                         outputRange: ['0deg', '90deg', '0deg'],
                       }),
                     },
                   ],
                   opacity: Animated.multiply(
-                    Animated.interpolate(anim, {
+                    anim.interpolate({
                       inputRange: [0, 1],
                       outputRange: [1, 0],
                     }),
-                    Animated.interpolate(anim.interpolate, {
+                    anim.interpolate({
                       inputRange: [0, 1],
                       outputRange: [0.25, 1],
                     }),
@@ -506,24 +506,24 @@ exports.examples = [
                 {
                   transform: [
                     {
-                      translateX: Animated.interpolate(anim, {
+                      translateX: anim.interpolate({
                         inputRange: [0, 1],
                         outputRange: [0, 200],
                       }),
                     },
                     {
-                      translateY: Animated.interpolate(anim, {
+                      translateY: anim.interpolate({
                         inputRange: [0, 0.5, 1],
                         outputRange: [0, 50, 0],
                       }),
                     },
                   ],
                   opacity: Animated.multiply(
-                    Animated.interpolate(anim, {
+                    anim.interpolate({
                       inputRange: [0, 1],
                       outputRange: [1, 0],
                     }),
-                    Animated.interpolate(anim, {
+                    anim.interpolate({
                       inputRange: [0, 1],
                       outputRange: [0.25, 1],
                     }),
@@ -548,7 +548,7 @@ exports.examples = [
                 {
                   transform: [
                     {
-                      scale: Animated.interpolate(anim, {
+                      scale: anim.interpolate({
                         inputRange: [0, 0.5],
                         outputRange: [1, 1.4],
                         extrapolateRight: 'clamp',
@@ -594,7 +594,7 @@ exports.examples = [
                 {
                   transform: [
                     {
-                      rotate: Animated.interpolate(anim.interpolate, {
+                      rotate: anim.interpolate({
                         inputRange: [0, 1],
                         outputRange: ['0deg', '90deg'],
                       }),
@@ -620,7 +620,7 @@ exports.examples = [
                 {
                   transform: [
                     {
-                      translateX: Animated.interpolate(anim, {
+                      translateX: anim.interpolate({
                         inputRange: [0, 1],
                         outputRange: [0, 100],
                       }),
@@ -646,7 +646,7 @@ exports.examples = [
                 {
                   transform: [
                     {
-                      translateX: Animated.interpolate(anim, {
+                      translateX: anim.interpolate({
                         inputRange: [0, 1],
                         outputRange: [0, 100],
                       }),
