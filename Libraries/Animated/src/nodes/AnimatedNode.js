@@ -36,9 +36,9 @@ class AnimatedNode {
 
   interpolate(config: any): AnimatedNode {
     throw new Error(
-      'This node type does not implement an interpolate method,'
-      + ' the interpolate method will be removed from all nodes'
-      + ' in favour of Animated.interpolate(animation, config).',
+      'This node type does not implement an interpolate method,' +
+        ' the interpolate method will be removed from all nodes' +
+        ' in favour of Animated.interpolate(animation, config).',
     );
   }
 

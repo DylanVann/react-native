@@ -46,10 +46,14 @@ import type {InterpolationConfigType} from './nodes/AnimatedInterpolation';
  *
  * @deprecated
  */
-const interpolateMethod = function (config: InterpolationConfigType): AnimatedInterpolation {
-  console.warn('The animation.interpolate(config) method will be removed from animated nodes in favour of Animated.interpolate(animation, config).');
+const interpolateMethod = function(
+  config: InterpolationConfigType,
+): AnimatedInterpolation {
+  console.warn(
+    'The animation.interpolate(config) method will be removed from animated nodes in favour of Animated.interpolate(animation, config).',
+  );
   return new AnimatedInterpolation(this, config);
-}
+};
 
 // To avoid some code duplication and a circular dependency we
 // are adding the interpolate method directly onto these prototypes.

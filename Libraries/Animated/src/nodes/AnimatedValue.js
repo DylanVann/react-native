@@ -10,14 +10,11 @@
  */
 'use strict';
 
-const AnimatedInterpolation = require('./AnimatedInterpolation');
-const AnimatedNode = require('./AnimatedNode');
 const AnimatedWithChildren = require('./AnimatedWithChildren');
 const InteractionManager = require('InteractionManager');
 const NativeAnimatedHelper = require('../NativeAnimatedHelper');
 
 import type Animation, {EndCallback} from '../animations/Animation';
-import type {InterpolationConfigType} from './AnimatedInterpolation';
 import type AnimatedTracking from './AnimatedTracking';
 
 const NativeAnimatedAPI = NativeAnimatedHelper.API;
