@@ -84,33 +84,43 @@ import javax.annotation.Nullable;
       (result - inputMin) / (inputMax - inputMin);
   }
 
-  /*package*/ static double interpolate(
-      double value,
-      double[] inputRange,
-      int[] outputRange,
-      String extrapolateLeft,
-      String extrapolateRight,
-      NativeAnimatedNodesManager nativeAnimatedNodesManager
-  ) {
-    int rangeIndex = findRangeIndex(value, inputRange);
-    AnimatedNode outputStart = nativeAnimatedNodesManager.getNodeById(outputRange[rangeIndex]);
-    AnimatedNode outputEnd = nativeAnimatedNodesManager.getNodeById(outputRange[rangeIndex + 1]);
-    Boolean startIsInvalid = outputStart == null || !(outputStart instanceof ValueAnimatedNode);
-    Boolean endIsInvalid = outputEnd == null || !(outputEnd instanceof ValueAnimatedNode);
-    if (startIsInvalid || endIsInvalid) {
+  private static ValueAnimatedNode getValueAnimatedNode(
+          NativeAnimatedNodesManager nativeAnimatedNodesManager,
+          int tag) {
+    AnimatedNode node = nativeAnimatedNodesManager.getNodeById(tag);
+    Boolean invalid = node == null || !(node instanceof ValueAnimatedNode);
+    if (invalid) {
       String error = "Illegal node ID set in outputRange of Animated.interpolate node";
       throw new JSApplicationCausedNativeException(error);
     }
-    double outputStartValue = ((ValueAnimatedNode) outputStart).getValue();
-    double outputEndValue = ((ValueAnimatedNode) outputEnd).getValue();
-    return interpolate(
-      value,
-      inputRange[rangeIndex],
-      inputRange[rangeIndex + 1],
-      outputStartValue,
-      outputEndValue,
-      extrapolateLeft,
-      extrapolateRight);
+    return (ValueAnimatedNode) node;
+  }
+
+  /*package*/ static double interpolate(
+          NativeAnimatedNodesManager nativeAnimatedNodesManager,
+          double value,
+          double[] inputRange,
+          int[] outputRangeNodeTags,
+          String extrapolateLeft,
+          String extrapolateRight) {
+    int rangeIndex = findRangeIndex(value, inputRange);
+    double inputStart = inputRange[rangeIndex];
+    double inputEnd = inputRange[rangeIndex + 1];
+    double outputStart = InterpolationAnimatedNode.getValueAnimatedNode(
+            nativeAnimatedNodesManager,
+            outputRangeNodeTags[rangeIndex]).getValue();
+    double outputEnd = InterpolationAnimatedNode.getValueAnimatedNode(
+            nativeAnimatedNodesManager,
+            outputRangeNodeTags[rangeIndex + 1]).getValue();
+    return InterpolationAnimatedNode.interpolate(
+            value,
+            inputStart,
+            inputEnd,
+            outputStart,
+            outputEnd,
+            extrapolateLeft,
+            extrapolateRight
+    );
   }
 
   private static int findRangeIndex(double value, double[] ranges) {
@@ -126,7 +136,7 @@ import javax.annotation.Nullable;
   private final NativeAnimatedNodesManager mNativeAnimatedNodesManager;
   private @Nullable ValueAnimatedNode mParent;
   private final double mInputRange[];
-  private final int mOutputRange[];
+  private final int mOutputRangeNodeTags[];
   private final String mExtrapolateLeft;
   private final String mExtrapolateRight;
 
@@ -136,7 +146,7 @@ import javax.annotation.Nullable;
     mNativeAnimatedNodesManager = nativeAnimatedNodesManager;
     mParent = (ValueAnimatedNode) nativeAnimatedNodesManager.getNodeById(config.getInt("parent"));
     mInputRange = fromDoubleArray(config.getArray("inputRange"));
-    mOutputRange = fromIntArray(config.getArray("outputRange"));
+    mOutputRangeNodeTags = fromIntArray(config.getArray("outputRange"));
     mExtrapolateLeft = config.getString("extrapolateLeft");
     mExtrapolateRight = config.getString("extrapolateRight");
   }
@@ -149,12 +159,12 @@ import javax.annotation.Nullable;
       return;
     }
     mValue = interpolate(
+            mNativeAnimatedNodesManager,
             mParent.getValue(),
             mInputRange,
-            mOutputRange,
+            mOutputRangeNodeTags,
             mExtrapolateLeft,
-            mExtrapolateRight,
-            mNativeAnimatedNodesManager
+            mExtrapolateRight
     );
   }
 }
